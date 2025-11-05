@@ -283,11 +283,11 @@ void Task::resetPreemptRequest() {
 moveit::core::MoveItErrorCode Task::execute(const SolutionBase& s) {
 	// If this is the first call to execute create a persistent node that can be used to call the action server
 	if (!execute_solution_node_) {
-		RCLCPP_WARN(execute_solution_node_->get_logger(), "Creating Persistent MTC node!");
 		execute_solution_node_ = rclcpp::Node::make_shared("moveit_task_constructor_executor_" +
-		                                                   std::to_string(reinterpret_cast<std::size_t>(this)));
-		execute_ac_ = rclcpp_action::create_client<moveit_task_constructor_msgs::action::ExecuteTaskSolution>(
-		    execute_solution_node_, "execute_task_solution");
+			std::to_string(reinterpret_cast<std::size_t>(this)));
+			execute_ac_ = rclcpp_action::create_client<moveit_task_constructor_msgs::action::ExecuteTaskSolution>(
+				execute_solution_node_, "execute_task_solution");
+		RCLCPP_WARN(execute_solution_node_->get_logger(), "Creating Persistent MTC node!");
 	}
 	if (!execute_ac_->wait_for_action_server(0.5s)) {
 		RCLCPP_ERROR(execute_solution_node_->get_logger(),
