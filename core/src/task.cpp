@@ -283,6 +283,7 @@ void Task::resetPreemptRequest() {
 moveit::core::MoveItErrorCode Task::execute(const SolutionBase& s) {
 	// If this is the first call to execute create a persistent node that can be used to call the action server
 	if (!execute_solution_node_) {
+		RCLCPP_WARN(execute_solution_node_->get_logger(), "Creating Persistent MTC node!");
 		execute_solution_node_ = rclcpp::Node::make_shared("moveit_task_constructor_executor_" +
 		                                                   std::to_string(reinterpret_cast<std::size_t>(this)));
 		execute_ac_ = rclcpp_action::create_client<moveit_task_constructor_msgs::action::ExecuteTaskSolution>(
@@ -300,6 +301,7 @@ moveit::core::MoveItErrorCode Task::execute(const SolutionBase& s) {
 	moveit_msgs::msg::MoveItErrorCodes error_code;
 	error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
 	auto goal_handle_future = execute_ac_->async_send_goal(goal);
+	RCLCPP_WARN(execute_solution_node_->get_logger(), "Sending goal to action server");
 	if (rclcpp::spin_until_future_complete(execute_solution_node_, goal_handle_future) !=
 	    rclcpp::FutureReturnCode::SUCCESS) {
 		RCLCPP_ERROR(execute_solution_node_->get_logger(), "Send goal call failed");
@@ -322,6 +324,7 @@ moveit::core::MoveItErrorCode Task::execute(const SolutionBase& s) {
 				RCLCPP_ERROR(execute_solution_node_->get_logger(), "Could not preempt execution");
 				return error_code;
 			} else {
+				RCLCPP_WARN(execute_solution_node_->get_logger(), "Preempted Successfully!");
 				error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
 				return error_code;
 			}

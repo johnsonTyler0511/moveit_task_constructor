@@ -115,22 +115,32 @@ void ExecuteTaskSolutionCapability::execCallback(
 	if (!constructMotionPlan(goal->solution, plan, goal_handle))
 		result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
 	else {
-		RCLCPP_INFO(LOGGER, "Executing TaskSolution");
+		RCLCPP_WARN(LOGGER, "Executing TaskSolution");
 		result->error_code = context_->plan_execution_->executeAndMonitor(plan);
 	}
 
-	if (result->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+	RCLCPP_WARN(LOGGER, "Result: %d", result->error_code.val);
+	if (result->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS) {
+		RCLCPP_WARN(LOGGER, "Succeeded");
 		goal_handle->succeed(result);
-	else if (result->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED && goal_handle->is_canceling())
+	}
+	else if (result->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED && goal_handle->is_canceling()) {
+		RCLCPP_WARN(LOGGER, "Preempted");
 		goal_handle->canceled(result);
-	else
+	}
+	else {
+		RCLCPP_WARN(LOGGER, "Aborted");
 		goal_handle->abort(result);
+	}
 }
 
 rclcpp_action::CancelResponse ExecuteTaskSolutionCapability::preemptCallback(
     const std::shared_ptr<rclcpp_action::ServerGoalHandle<ExecuteTaskSolutionAction>>& /*goal_handle*/) {
-	if (context_->plan_execution_)
+	RCLCPP_WARN(LOGGER, "Preempt callback!!");
+	if (context_->plan_execution_) {
+		RCLCPP_WARN(LOGGER, "Plan Execution Stop!!");
 		context_->plan_execution_->stop();
+	}
 	return rclcpp_action::CancelResponse::ACCEPT;
 }
 
